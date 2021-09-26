@@ -1,0 +1,19 @@
+#!/bin/bash
+
+mydir=$(cd "$(dirname "$0")"; pwd)
+. "${mydir}/http_functions"
+. "${mydir}/screentime_functions"
+
+time_dir="/var/local/screentime"
+log_file="/var/log/webfs/screentime.log"
+
+http_error_400_if_empty "$QUERY_STRING" "HTTP query string"
+
+user="$QUERY_STRING"
+
+http_error_400_if_not_alphanumeric_maxlength_10 "$user" "Username"
+
+x=$(logins_remaining "${time_dir}" "${user}")
+decrease_if_positive "${x}"
+
+logged_http_response "${x}" "${log_file}"

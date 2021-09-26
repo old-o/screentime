@@ -1,0 +1,17 @@
+#!/bin/bash
+
+mydir=$(cd "$(dirname "$0")"; pwd)
+. "${mydir}/http_functions"
+. "${mydir}/screentime_functions"
+
+time_dir="/var/local/screentime"
+
+http_error_400_if_empty "$QUERY_STRING" "HTTP query string"
+
+user="$QUERY_STRING"
+
+http_error_400_if_not_alphanumeric_maxlength_10 "$user" "Username"
+
+get_logins_remaining "${time_dir}" "${user}"
+
+http_response "The user ${user} has ${_result_} minutes of screen time remaining."

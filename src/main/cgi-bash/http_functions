@@ -1,0 +1,46 @@
+#!/bin/bash
+
+function http_response() {
+  echo "Status: 200 OK"
+  echo "Content-type: text/plain"
+  echo
+  echo "${1}"
+  exit 0
+}
+
+function http_error() {
+  echo "Status: ${1} ${2}"
+  echo "Content-type: text/plain"
+  echo
+  echo "${3}"
+  exit 1
+}
+
+function http_error_400_if_empty() {
+  if [ -z "${1}" ]; then
+    http_error 400 "Bad request" "Empty ${2}"
+  fi
+}
+
+function http_error_400_if_not_alphanumeric_maxlength_10() {
+  if [[ ! "${1}" =~ ^[a-z0-9]{1,10}$ ]]; then
+    http_error 400 "Bad request" "${2} : May be up to 10 alphanumeric chars. Not: ${1}" 
+  fi
+}
+
+function http_error_404_if_not_directory() {
+  if [ ! -d "${1}" ]; then
+    http_error 404 "Not Found" "${2}"
+  fi 
+}
+
+function http_error_404_if_not_a_number() {
+  if [ ! "${1}" -eq "${1}" ]; then
+    http_error 404 "Not Found" "${2}"
+  fi
+}
+
+function logged_http_response() {
+  echo "$(date --rfc-3339 seconds) : ${1}" >> "${2}"
+  http_response "${1}"
+}
