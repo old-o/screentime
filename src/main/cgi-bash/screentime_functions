@@ -1,20 +1,19 @@
 #!/bin/bash
 
-function get_logins_remaining() { # 1:screentime_dir, 2:user
+function get_screentime_remaining() { # 1:screentime_dir, 2:user
   local dir="${1}/${2}"
-  local err="No screentime counter found for user: ${2}"
-  http_error_404_if_not_directory "${dir}" "${err}"
-  cd "${dir}"
-  local x="$(ls)"
-  http_error_404_if_not_a_number "${x}" "${err}"
-  _result_="${x}"
+  cd "${dir}" && {
+    local x="$(ls)"
+    echo "${x}"
+  }
 }
 
-function decrease_if_positive() { # 1:dirname
-  local x = "${1}"
-  if [ "${x}" -gt "0" ]; then 
-    mv "${x}" "$[x-1]"
-  fi
+function decrease_if_positive() { # 1:timedir 2:user 3:counter
+  local x=$3
+  test $x -gt 0 && {
+    cd "$1/$2"
+    mv "$x" "$[x-1]"
+  }
 }
 
 

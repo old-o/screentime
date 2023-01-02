@@ -4,16 +4,14 @@ mydir=$(cd "$(dirname "$0")"; pwd)
 . "${mydir}/http_functions"
 . "${mydir}/screentime_functions"
 
-time_dir="/var/local/screentime"
-log_file="/var/log/webfs/screentime.log"
-
-http_error_400_if_empty "$QUERY_STRING" "HTTP query string"
-
 user="$QUERY_STRING"
+http_error_400_if_invalid_username "$user" "Username"
 
-http_error_400_if_not_alphanumeric_maxlength_10 "$user" "Username"
+time_dir="/var/local/screentime"
+remaining=$(get_screentime_remaining "${time_dir}" "${user}")
+http_error_404_if_invalid_counter "$user" "$?" "$remaining"
 
-x=$(logins_remaining "${time_dir}" "${user}")
-decrease_if_positive "${x}"
+decrease_if_positive "${time_dir}" "${user}" "${remaining}"
 
-logged_http_response "${x}" "${log_file}"
+log_file="/var/log/webfs/screentime.log"
+logged_http_response "${remaining}" "${log_file}"

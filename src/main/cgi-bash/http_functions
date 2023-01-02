@@ -16,6 +16,11 @@ function http_error() {
   exit 1
 }
 
+function http_error_400_if_invalid_username() {
+  http_error_400_if_empty "${1}" "${2}"
+  http_error_400_if_not_alphanumeric_maxlength_10 "${1}" "${2}"
+}
+
 function http_error_400_if_empty() {
   if [ -z "${1}" ]; then
     http_error 400 "Bad request" "Empty ${2}"
@@ -26,6 +31,16 @@ function http_error_400_if_not_alphanumeric_maxlength_10() {
   if [[ ! "${1}" =~ ^[a-z0-9]{1,10}$ ]]; then
     http_error 400 "Bad request" "${2} : May be up to 10 alphanumeric chars. Not: ${1}" 
   fi
+}
+
+function http_error_404_if_invalid_counter() {
+  local user="$1"
+  local counter_status="$2"
+  local counter_value="$3"
+  if [ $counter_status -ne 0 ]; then
+    http_error 404 "Not Found" "No screentime counter found for user: ${user}"
+  fi
+  http_error_404_if_not_a_number "$counter_value" "Invalid screentime counter for user: ${user}"
 }
 
 function http_error_404_if_not_directory() {
